@@ -4,11 +4,11 @@ pipeline {
     agent any
     
     // START OF TOOLS BLOCK
-    tools {
-        // Use the names defined in Global Tool Configuration
-        jdk 'JDK_21' 
-        maven 'M3_SYS_INSTALL' 
-    }
+    // tools {
+    //     // Use the names defined in Global Tool Configuration
+    //     jdk 'JDK_21' 
+    //     maven 'M3_SYS_INSTALL' 
+    // }
     
     // Environment: Define variables accessible throughout the pipeline.
     environment {
@@ -29,13 +29,24 @@ pipeline {
     // Stages: Logical blocks that group steps (tasks) in the CI/CD process.
     stages {
         stage('1. Build & Test') {
-            steps {
-                // sh: Executes a shell command in the Jenkins workspace.
-                // mvn clean package: Compiles the source code and packages it into a JAR file.
-                // -DskipTests: Skips unit tests to speed up the CI/CD pipeline (tests should ideally run here).
+    steps {
+        script {
+            // Get the paths set by the 'tools' directive
+            def M2_HOME = tool 'M3_SYS_INSTALL'
+            def JAVA_HOME = tool 'JDK_21'
+            
+            // Explicitly set the PATH for the Maven build step
+            withEnv([
+                "PATH+MAVEN=${M2_HOME}/bin",
+                "PATH+JAVA=${JAVA_HOME}/bin"
+            ]) {
+                echo "Running build with PATH including: ${M2_HOME}/bin and ${JAVA_HOME}/bin"
+                // Run the command, which should now find 'mvn'
                 sh 'mvn clean package -DskipTests'
             }
         }
+    }
+}
         
         stage('2. Docker Build & Push to ECR') {
             steps {
