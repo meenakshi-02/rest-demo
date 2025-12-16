@@ -4,11 +4,11 @@ pipeline {
     agent any
     
     // START OF TOOLS BLOCK
-   // tools {
+    tools {
         // Use the names defined in Global Tool Configuration
-     //   jdk 'JDK_21' 
-     //   maven 'M3_SYS_INSTALL' 
-   // }
+        jdk 'JDK_21' 
+        maven 'M3_SYS_INSTALL' 
+    }
     
     // Environment: Define variables accessible throughout the pipeline.
     environment {
@@ -30,12 +30,12 @@ pipeline {
     stages {
         stage('1. Build & Test') {
             steps {
-                // *** CRITICAL FIX: Running inside a bash login shell ***
-                // bash -lc: Executes the command (-c) within a login shell (-l), 
-                // which correctly sets the PATH and environment for 'mvn'.
-                sh 'bash -lc "/usr/share/maven/bin/mvn clean package -DskipTests"'
+                // sh: Executes a shell command in the Jenkins workspace.
+                // mvn clean package: Compiles the source code and packages it into a JAR file.
+                // -DskipTests: Skips unit tests to speed up the CI/CD pipeline (tests should ideally run here).
+                sh 'mvn clean package -DskipTests'
             }
-         }
+        }
         
         stage('2. Docker Build & Push to ECR') {
             steps {
