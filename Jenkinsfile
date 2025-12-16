@@ -3,6 +3,13 @@ pipeline {
     // Agent: Specifies where the pipeline should run. 'any' means Jenkins will use any available executor (e.g., the Jenkins master server).
     agent any
     
+    // START OF TOOLS BLOCK
+    tools {
+        // Use the names defined in Global Tool Configuration
+        jdk 'JDK_21' 
+        maven 'M3_SYS_INSTALL' 
+    }
+    
     // Environment: Define variables accessible throughout the pipeline.
     environment {
         // --- AWS Configuration ---
