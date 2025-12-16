@@ -31,18 +31,27 @@ pipeline {
         stage('1. Build & Test') {
     steps {
         script {
-            // Get the paths set by the 'tools' directive
             def M2_HOME = tool 'M3_SYS_INSTALL'
             def JAVA_HOME = tool 'JDK_21'
             
-            // Explicitly set the PATH for the Maven build step
             withEnv([
                 "PATH+MAVEN=${M2_HOME}/bin",
                 "PATH+JAVA=${JAVA_HOME}/bin"
             ]) {
                 echo "Running build with PATH including: ${M2_HOME}/bin and ${JAVA_HOME}/bin"
-                // Run the command, which should now find 'mvn'
-                sh 'mvn clean package -DskipTests'
+                
+                // --- DIAGNOSTIC STEPS ---
+                // 1. Check for file permissions and ownership
+                sh "ls -ld ${M2_HOME} ${M2_HOME}/bin ${M2_HOME}/bin/mvn"
+                
+                // 2. Check for missing dynamic dependencies (a library issue)
+                // If this command shows 'No such file or directory' it means the executable itself
+                // is misconfigured for the current agent's Linux distribution (e.g., missing glibc).
+                sh "ldd ${M2_HOME}/bin/mvn || echo 'ldd failed (file likely not a dynamic executable)'"
+                
+                // 3. Attempt to run using the full, explicit path
+                sh "${M2_HOME}/bin/mvn clean package -DskipTests" 
+                // --- END DIAGNOSTIC STEPS ---
             }
         }
     }
