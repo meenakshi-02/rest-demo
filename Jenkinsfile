@@ -30,10 +30,12 @@ pipeline {
     stages {
         stage('1. Build & Test') {
             steps {
-                // *** CRITICAL FIX: USING ABSOLUTE PATH TO MVN ***
-                sh '/usr/share/maven/bin/mvn clean package -DskipTests'
+                // *** CRITICAL FIX: Running inside a bash login shell ***
+                // bash -lc: Executes the command (-c) within a login shell (-l), 
+                // which correctly sets the PATH and environment for 'mvn'.
+                sh 'bash -lc "/usr/share/maven/bin/mvn clean package -DskipTests"'
             }
-        }
+         }
         
         stage('2. Docker Build & Push to ECR') {
             steps {
